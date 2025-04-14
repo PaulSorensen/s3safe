@@ -1,4 +1,4 @@
-# s3safe
+# S3Safe
 
 ## Overview
 
