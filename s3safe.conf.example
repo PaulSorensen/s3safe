@@ -1,0 +1,70 @@
+########################################################################################################
+# Backup Directory
+########################################################################################################
+# Define where to store temporary files.
+# Example: "$HOME/backup"
+BACKUP_DIR="$HOME/backup"
+
+########################################################################################################
+# Snapshot Directory
+########################################################################################################
+# Define where to save temporary snapshot of www.
+# Example: "$BACKUP_DIR/snap/www"
+SNAP_DIR="$BACKUP_DIR/snap/www"
+
+########################################################################################################
+# Logging Directory
+########################################################################################################
+# Define where to store log files.
+# Example: "$BACKUP_DIR/logs"
+LOG_DIR="$BACKUP_DIR/logs"
+
+########################################################################################################
+# Server Name
+########################################################################################################
+# Define name of the server you are backing up.
+# Example: "MyServer"
+SERVER="MyServer"
+
+########################################################################################################
+# WWW ROOT
+########################################################################################################
+# Specify www root. If not set '/var/www' is used as default.
+# Example: "/var/www"
+WWWROOT=""
+
+########################################################################################################
+# Components
+########################################################################################################
+# Enable components you want to be backed up by setting 'on' for each component.
+# Example: COMPONENT_WWW=on
+COMPONENT_WWW=on
+COMPONENT_DB=on
+COMPONENT_DB_USERS=on
+
+########################################################################################################
+# Push Notifications
+########################################################################################################
+# If set to 'on' you'll receive push notifications.
+# Authentication settings for push notifications must be configured in .env beforehand.
+# Example: TELEGRAM_NOTIFICATIONS=on
+TELEGRAM_NOTIFICATIONS=on
+
+########################################################################################################
+# Debugging
+########################################################################################################
+# Debug mode. When 'on', enable detailed logging for backup operations (e.g., snapshot creation,
+# compression attempts, encryption, and upload steps) to both the console and log file.
+# When 'off', logs minimal messages to the log file, and suppresses console output.
+# Example: DEBUG=on
+DEBUG=off
+
+# Verbose debug. When 'on' and DEBUG=on, logs detailed exceptions, and full list of compressed files
+# to both the console and log file.
+# Example: DEBUG_VERBOSE=on
+DEBUG_VERBOSE=off
+
+# Skip S3 upload. When 'on', skips S3 uploads for debugging purposes. When 'off', uploads backups to S3.
+# Example: DEBUG_SKIP_S3=on
+DEBUG_SKIP_S3=off
+########################################################################################################
