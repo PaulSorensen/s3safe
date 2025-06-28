@@ -1,8 +1,9 @@
 # S3Safe
 
-## Overview
+[![Badge](https://img.shields.io/badge/License-MIT-97CA00)](/LICENSE)
+[![Badge](https://img.shields.io/badge/-Buy%20Me%20a%20Coffee-dab728?logo=buymeacoffee&logoColor=white)](https://buymeacoffee.com/paulsorensen)
 
-**S3Safe** is a robust Bash script for backing up websites, databases, and database users to any S3-compatible storage (e.g., AWS S3, Cloudflare R2, Google Cloud Storage, Infomaniak Swiss Backup) using AWS CLI. It compresses, encrypts backups with GPG, and uploads them securely. Features include retry logic for reliability, push notifications for failures, and flexible configuration for components (WWW, DB, DB users). Logs provide detailed tracking, with optional debugging modes.
+**S3Safe** is a robust Bash script for backing up websites, databases, and database users to any S3-compatible storage (e.g., AWS S3, Cloudflare R2, Google Cloud Storage, Infomaniak Swiss Backup) using AWS CLI. It compresses, encrypts backups with GPG, and uploads them securely. Features include retry logic for reliability, notifications for failures, and flexible configuration for components (WWW, DB, DB users). Logs provide detailed tracking, with optional debugging modes.
 
 ## Features
 
@@ -10,9 +11,11 @@
 - Supports any S3-compatible storage via AWS CLI.
 - Compresses and encrypts backups with GPG for security.
 - Configurable backup components (enable/disable WWW, DB, DB users).
-- Retry logic for compression, encryption and S3 uploads for websites, databases and database users, and database dumps
-- Push notifications for failures (can be disabled for custom monitoring, e.g., Zabbix):
-  - Telegram notifications
+- Retry logic for compression, encryption and S3 uploads for websites, databases and database users, and database dumps.
+- Supports multiple notification methods for failures (can be disabled for custom monitoring, e.g., Zabbix):
+  - [ntfy](https://ntfy.sh)
+  - Telegram Bot
+  - Webhook
 - Customizable backup, snapshot, and log directories.
 - Debugging modes for detailed logging and S3 upload skipping.
 - Logs all operations for monitoring and troubleshooting.
@@ -34,8 +37,8 @@ Before running the script, ensure:
 - MariaDB or MySQL (script supports both).
 - AWS CLI installed and configured.
 - GPG for encryption.
-- `curl` for Telegram notifications (if enabled).
-- `rsync` and tar for file operations.
+- `curl` for notifications (if enabled).
+- `rsync` and `tar` for file operations.
 
 ## Installation
 
@@ -120,41 +123,50 @@ Before running the script, ensure:
    - `S3_BUCKET`: Your S3 bucket name.
    - `S3_ENDPOINT`: Your S3-compatible endpoint URL.
    - `GPG_RECIPIENT`: GPG key ID or email for encryption.
-   - `TELEGRAM_BOT_TOKEN`: Telegram bot token (optional, for notifications).
-   - `TELEGRAM_CHAT_ID`: Telegram chat ID (optional, for notifications).
-   - **Note**: Telegram notifications are enabled by default in `s3safe.conf`. Disable if not using.
+   - `NTFY_TOPIC`: ntfy topic (optional)
+   - `TELEGRAM_BOT_TOKEN`: Telegram bot token (optional).
+   - `TELEGRAM_CHAT_ID`: Telegram chat ID (optional).
+   - `WEBHOOK_URL`: Webhook URL (optional).
+   - **Note**: Notifications are enabled by default in `s3safe.conf` (disable if not using), and all notification methods set in .env will be used.
 
 3. **Edit s3safe.conf**:
 
    **Server Name:**
 
 - Set `SERVER` to your server's name (e.g., MyServer).
-
+  
    **Components:**
 
 - Enable/disable components to back up:
+  
   - `COMPONENT_WWW=on` (backs up websites).
+  
   - `COMPONENT_DB=on` (backs up databases).
+  
   - `COMPONENT_DB_USERS=on` (backs up database users).
 
-   **Notifications:**
+    **Notifications:**
 
-- Set `TELEGRAM_NOTIFICATIONS=off` to disable Telegram notifications and monitor logs manually (e.g., via Zabbix).
-
+- Set `NOTIFICATIONS=off` to disable notifications and monitor logs manually (e.g., via Zabbix), or leave it on to receive notifications.
+  
    **WWW Root:**
 
 - Set `WWWROOT` to your web root (e.g., `/var/www`). Defaults to `/var/www` if unset. The script backs up all directories in this path.
-
+  
    **Directories:**
 
 - `BACKUP_DIR`: Temporary storage (default: `$HOME/backup`).
-- `SNAP_DIR`: Snapshot directory (default: `$BACKUP_DIR/snap/www`).
-- `LOG_DIR`: Log storage (default: `$BACKUP_DIR/logs`).
 
+- `SNAP_DIR`: Snapshot directory (default: `$BACKUP_DIR/snap/www`).
+
+- `LOG_DIR`: Log storage (default: `$BACKUP_DIR/logs`).
+  
    **Debugging:**
 
 - `DEBUG=on`: Enables detailed logging to console and log file.
+
 - `DEBUG_VERBOSE=on`: Logs exceptions and file lists (requires `DEBUG=on`).
+
 - `DEBUG_SKIP_S3=on`: Skips S3 uploads for testing.
 
 4. **Test the Script**
@@ -173,7 +185,7 @@ Before running the script, ensure:
 With `DEBUG=off`, backing up domain.com, database domain_com and database users:
 
 ```bash
-Backup of WWW, DB and DB Users started at: 2025-04-14_01-00-00
+Backup of WWW, DB and DB Users started at: 20250628_234510
 Backing up website: domain.com
 Compressed website: domain.com
 Website uploaded: domain.com
@@ -189,7 +201,7 @@ Compressed database users
 Database users uploaded
 Database users backed up
 
-Backup completed at: 2025-04-14_01-05-00
+Backup completed at: 20250628_235010
 ```
 
 ## Scheduling
@@ -210,20 +222,21 @@ Add:
 
 - Backup Retention: Configure lifecycle rules on your S3-compatible storage to manage backup retention (e.g., retain last 14 days).
 - Log Management: Logs are stored in `LOG_DIR`. Set up `logrotate` to manage log files.
-- Error Handling: The script retries failed operations (compression, encryption and S3 uploads for websites, databases and database users, and database dumps) up to 2 times (3 times total). Enable push notifications for failure alerts or monitor logs through custom software or manually.
+- Error Handling: The script retries failed operations (compression, encryption and S3 uploads for websites, databases and database users, and database dumps) up to 2 times (3 times total). Enable notifications for failure alerts or monitor logs through custom software or manually.
 - Security: Ensure `~/.my.cnf` and `.env` permissions are restricted (`chmod 600`). Verify GPG keys are correctly set up to prevent encryption errors.
 
-## Enjoying This Script?
+## Author
 
-**If you found this script useful, a small tip is appreciated ❤️**
+**Paul Sørensen**  
+[https://paulsorensen.io](https://paulsorensen.io)  
+[https://github.com/paulsorensen](https://github.com/paulsorensen)
+
+## Support
+
+If you found this project useful, a small tip is appreciated ❤️  
 [https://buymeacoffee.com/paulsorensen](https://buymeacoffee.com/paulsorensen)
 
 ## License
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 of the License.
-
-**Legal Notice:** If you edit and redistribute this code, you must mention the original author, **Paul Sørensen** ([paulsorensen.io](https://paulsorensen.io)), in the redistributed code or documentation.
-
-**Copyright (C) 2025 Paul Sørensen ([paulsorensen.io](https://paulsorensen.io))**
-
-See the LICENSE file in this repository for the full text of the GNU General Public License v3.0, or visit [https://www.gnu.org/licenses/gpl-3.0.txt](https://www.gnu.org/licenses/gpl-3.0.txt)
+This project is licensed under the MIT License.  
+See [LICENSE](LICENSE) for details.
