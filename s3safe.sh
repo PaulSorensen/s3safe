@@ -4,8 +4,8 @@
 # Author        : Paul Sørensen
 # Website       : https://paulsorensen.io
 # GitHub        : https://github.com/paulsorensen
-# Version       : 1.1
-# Last Modified : 2025/06/29 02:36:44
+# Version       : 1.2
+# Last Modified : 2025/06/29 20:13:25
 #
 # Description:
 # Backs up websites, databases, and database users to S3-compatible storage with
@@ -57,7 +57,7 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/s3safe-$TIMESTAMP.log"
 
-# Debug to log file
+# Debug output and error logging
 if [ "${DEBUG}" = "on" ]; then
     set -x
     if ! exec 2>>"$LOG_FILE"; then
@@ -72,7 +72,7 @@ if [ -n "$GPG_RECIPIENT" ] && ! gpg --list-keys "$GPG_RECIPIENT" >/dev/null 2>&1
     log_error "Public key not found in keyring. Make sure to import a public key and specify it in .env."
     exit 1
 fi
-set -x
+if [ "${DEBUG}" = "on" ]; then set -x; fi
 
 # Check S3 endpoint connectivity
 set +x
@@ -87,24 +87,26 @@ if [ -n "$S3_ENDPOINT" ] && [ -n "$S3_BUCKET" ]; then
         sleep 5
     done
     if [ $S3_SUCCESS -eq 0 ]; then
-        log_error "Error: Cannot connect to S3 endpoint or access bucket after 3 attempts. Check credentials and endpoint in .env."
+        log_error "Error: Cannot connect to S3 endpoint or access bucket after 3 attempts. Check credentials (aws configure), and endpoint in .env."
         exit 1
     fi
 fi
-set -x
+if [ "${DEBUG}" = "on" ]; then set -x; fi
 
 # Check notification method connectivity if notifications are enabled
-set +x
 if [ "$NOTIFICATIONS" = "on" ]; then
 
     # ntfy: If topic is set, check if ntfy server is reachable (warn only)
+    set +x
     if [ -n "$NTFY_TOPIC" ]; then
         if ! curl -sfI "https://ntfy.sh/" 2>/dev/null | grep -q "200" >/dev/null 2>&1; then
             log_error "Warning: ntfy server not reachable. Notifications may fail."
-        fi
+        fi     
     fi
+    if [ "${DEBUG}" = "on" ]; then set -x; fi
 
     # Telegram: If bot token and chat ID are set, check connectivity (exit on failure)
+    set +x
     if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
         TELEGRAM_CHAT_SUCCESS=0
         for ((i=0; i<3; i++)); do
@@ -120,16 +122,19 @@ if [ "$NOTIFICATIONS" = "on" ]; then
             exit 1
         fi
     fi
+    if [ "${DEBUG}" = "on" ]; then set -x; fi
 
     # Webhook: If URL is set, check if endpoint returns HTTP 2xx (warn only)
+    set +x
     if [ -n "$WEBHOOK_URL" ]; then
         HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$WEBHOOK_URL" 2>/dev/null)
+        
         if [[ "$HTTP_CODE" != 2* && "$HTTP_CODE" != 405 ]]; then
             log_error "Warning: Webhook endpoint returned HTTP $HTTP_CODE. Notifications may fail."
         fi
     fi
+    if [ "${DEBUG}" = "on" ]; then set -x; fi
 fi
-set -x
 
 # Define component names
 COMPONENT_WWW_TEXT=""

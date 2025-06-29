@@ -16,6 +16,7 @@ send_notification() {
     if [ "$NOTIFICATIONS" = "on" ]; then
         SUCCESS=0
         (
+            set +x
             [ -n "$NTFY_TOPIC" ] && curl -s -H "Priority: high" -d "$MSG" "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>/dev/null && SUCCESS=1
             [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] && curl -s \
                 --data chat_id="$TELEGRAM_CHAT_ID" \
