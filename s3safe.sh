@@ -5,7 +5,7 @@
 # Website       : https://paulsorensen.io
 # GitHub        : https://github.com/paulsorensen
 # Version       : 1.2
-# Last Modified : 2025/06/29 20:13:25
+# Last Modified : 2025/06/29 20:36:39
 #
 # Description:
 # Backs up websites, databases, and database users to S3-compatible storage with
@@ -248,7 +248,7 @@ if [ "$COMPONENT_WWW" = "on" ]; then
                         if [ "$DEBUG_SKIP_S3" = "on" ]; then
                             echo "S3 upload skipped for: $SITE_NAME (DEBUG_SKIP_S3=on)" >> "$LOG_FILE"
                             [ "$DEBUG" = "on" ] && echo "S3 upload skipped for: $SITE_NAME (DEBUG_SKIP_S3=on)"
-                        elif { set +x; aws s3 cp "$BACKUP_DIR/www-$SITE_NAME.tar.gz.gpg" "s3://$S3_BUCKET/www/$SITE_NAME/$TIMESTAMP/www-$SITE_NAME.tar.gz.gpg" --endpoint-url "$S3_ENDPOINT" --checksum-algorithm CRC32 >/dev/null 2>&1; set -x; }; then
+                        elif { set +x; aws s3 cp "$BACKUP_DIR/www-$SITE_NAME.tar.gz.gpg" "s3://$S3_BUCKET/www/$SITE_NAME/$TIMESTAMP/www-$SITE_NAME.tar.gz.gpg" --endpoint-url "$S3_ENDPOINT" --checksum-algorithm CRC32 >/dev/null 2>&1; if [ "${DEBUG}" = "on" ]; then set -x; fi; }; then
                             echo "Website uploaded: $SITE_NAME" >> "$LOG_FILE"
                             [ "$DEBUG" = "on" ] && echo "Uploaded website: $SITE_NAME"
                         else
@@ -340,7 +340,7 @@ if [ "$COMPONENT_DB" = "on" ]; then
                     if [ "$DEBUG_SKIP_S3" = "on" ]; then
                         echo "S3 upload skipped for: $DB (DEBUG_SKIP_S3=on)" >> "$LOG_FILE"
                         [ "$DEBUG" = "on" ] && echo "S3 upload skipped for: $DB (DEBUG_SKIP_S3=on)"
-                    elif { set +x; aws s3 cp "$BACKUP_DIR/db-$DB.tar.gz.gpg" "s3://$S3_BUCKET/db/$DB/$TIMESTAMP/db-$DB.tar.gz.gpg" --endpoint-url "$S3_ENDPOINT" --checksum-algorithm CRC32 >/dev/null 2>&1; set -x; }; then
+                    elif { set +x; aws s3 cp "$BACKUP_DIR/db-$DB.tar.gz.gpg" "s3://$S3_BUCKET/db/$DB/$TIMESTAMP/db-$DB.tar.gz.gpg" --endpoint-url "$S3_ENDPOINT" --checksum-algorithm CRC32 >/dev/null 2>&1; if [ "${DEBUG}" = "on" ]; then set -x; fi; }; then
                         echo "Database uploaded: $DB" >> "$LOG_FILE"
                         [ "$DEBUG" = "on" ] && echo "Uploaded database: $DB"
                     else
@@ -433,7 +433,7 @@ if [ "$COMPONENT_DB_USERS" = "on" ]; then
                 if [ "$DEBUG_SKIP_S3" = "on" ]; then
                     echo "S3 upload skipped for: db-users (DEBUG_SKIP_S3=on)" >> "$LOG_FILE"
                     [ "$DEBUG" = "on" ] && echo "S3 upload skipped: for db-users (DEBUG_SKIP_S3=on)"
-                elif { set +x; aws s3 cp "$BACKUP_DIR/db-users.tar.gz.gpg" "s3://$S3_BUCKET/db-users/global/$TIMESTAMP/db-users.tar.gz.gpg" --endpoint-url "$S3_ENDPOINT" --checksum-algorithm CRC32 >/dev/null 2>&1; set -x; }; then
+                elif { set +x; aws s3 cp "$BACKUP_DIR/db-users.tar.gz.gpg" "s3://$S3_BUCKET/db-users/global/$TIMESTAMP/db-users.tar.gz.gpg" --endpoint-url "$S3_ENDPOINT" --checksum-algorithm CRC32 >/dev/null 2>&1; if [ "${DEBUG}" = "on" ]; then set -x; fi; }; then
                     echo "Database users uploaded" >> "$LOG_FILE"
                     [ "$DEBUG" = "on" ] && echo "Uploaded database users"
                 else
