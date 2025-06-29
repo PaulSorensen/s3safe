@@ -5,7 +5,7 @@
 # Website       : https://paulsorensen.io
 # GitHub        : https://github.com/paulsorensen
 # Version       : 1.1
-# Last Modified : 2025/06/29 01:17:38
+# Last Modified : 2025/06/29 02:36:44
 #
 # Description:
 # Backs up websites, databases, and database users to S3-compatible storage with
@@ -67,12 +67,15 @@ if [ "${DEBUG}" = "on" ]; then
 fi
 
 # Check if GPG_RECIPIENT key exists in keyring
+set +x
 if [ -n "$GPG_RECIPIENT" ] && ! gpg --list-keys "$GPG_RECIPIENT" >/dev/null 2>&1; then
-    log_error "Public key '$GPG_RECIPIENT' not found in keyring. Make sure to import a public key and specify it in .env."
+    log_error "Public key not found in keyring. Make sure to import a public key and specify it in .env."
     exit 1
 fi
+set -x
 
 # Check S3 endpoint connectivity
+set +x
 if [ -n "$S3_ENDPOINT" ] && [ -n "$S3_BUCKET" ]; then
     S3_SUCCESS=0
     for ((i=0; i<3; i++)); do
@@ -88,13 +91,15 @@ if [ -n "$S3_ENDPOINT" ] && [ -n "$S3_BUCKET" ]; then
         exit 1
     fi
 fi
+set -x
 
 # Check notification method connectivity if notifications are enabled
+set +x
 if [ "$NOTIFICATIONS" = "on" ]; then
 
     # ntfy: If topic is set, check if ntfy server is reachable (warn only)
     if [ -n "$NTFY_TOPIC" ]; then
-        if ! curl -sfI "https://ntfy.sh/" >/dev/null; then
+        if ! curl -sfI "https://ntfy.sh/" 2>/dev/null | grep -q "200" >/dev/null 2>&1; then
             log_error "Warning: ntfy server not reachable. Notifications may fail."
         fi
     fi
@@ -103,7 +108,7 @@ if [ "$NOTIFICATIONS" = "on" ]; then
     if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
         TELEGRAM_CHAT_SUCCESS=0
         for ((i=0; i<3; i++)); do
-            if curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getChat" -d chat_id="$TELEGRAM_CHAT_ID" | grep -q '"ok":true'; then
+            if curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getChat" -d chat_id="$TELEGRAM_CHAT_ID" 2>/dev/null | grep -q '"ok":true'; then
                 TELEGRAM_CHAT_SUCCESS=1
                 break
             fi
@@ -111,19 +116,20 @@ if [ "$NOTIFICATIONS" = "on" ]; then
             sleep 5
         done
         if [ $TELEGRAM_CHAT_SUCCESS -eq 0 ]; then
-            log_error "Error: Cannot access Telegram chat $TELEGRAM_CHAT_ID after 3 attempts. Check TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env"
+            log_error "Error: Cannot access Telegram chat after 3 attempts. Check TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env"
             exit 1
         fi
     fi
 
     # Webhook: If URL is set, check if endpoint returns HTTP 2xx (warn only)
     if [ -n "$WEBHOOK_URL" ]; then
-        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$WEBHOOK_URL")
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$WEBHOOK_URL" 2>/dev/null)
         if [[ "$HTTP_CODE" != 2* && "$HTTP_CODE" != 405 ]]; then
             log_error "Warning: Webhook endpoint returned HTTP $HTTP_CODE. Notifications may fail."
         fi
     fi
 fi
+set -x
 
 # Define component names
 COMPONENT_WWW_TEXT=""
