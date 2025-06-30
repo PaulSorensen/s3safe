@@ -5,7 +5,7 @@
 # Website       : https://paulsorensen.io
 # GitHub        : https://github.com/paulsorensen
 # Version       : 1.2
-# Last Modified : 2025/06/29 20:36:39
+# Last Modified : 2025/06/30 09:25:09
 #
 # Description:
 # Backs up websites, databases, and database users to S3-compatible storage with
@@ -25,6 +25,9 @@ echo ""
 
 # Define script directory
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+# Set a safe PATH for cron
+export PATH="/usr/local/bin:/usr/bin:/bin"
 
 # Check for required config files
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
